@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Diretórios de origem e destino
+SOURCE_DIR="/caminho/para/pastaA/"
+DEST_DIR="/caminho/para/pastaB/"
+
+# Arquivo de log para armazenar a saída do rsync
+LOG_FILE="/caminho/para/backup_log.txt"
+
+# Data e hora atual para registro no log
+CURRENT_DATE=$(date +"%Y-%m-%d %H:%M:%S")
+
+# Opções do rsync para backup incremental
+# -a: Arquivo, preserva permissões, timestamps, etc.
+# -v: Modo verbose
+# -h: Saída legível por humanos
+# --delete: Remove arquivos do destino que não existem mais na origem
+# --progress: Mostra o progresso do backup
+RSYNC_OPTIONS="-avh --delete --progress"
+
+# Executa o backup incremental
+rsync $RSYNC_OPTIONS "$SOURCE_DIR" "$DEST_DIR" >> "$LOG_FILE" 2>&1
+
+# Registra a conclusão do backup no log
+echo "Backup incremental concluído em $CURRENT_DATE" >> "$LOG_FILE"
