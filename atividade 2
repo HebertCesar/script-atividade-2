@@ -1,0 +1,39 @@
+@echo off
+setlocal
+
+rem Define o intervalo de tempo para verificar a rede (em segundos)
+set IntervaloVerificacao=60
+
+rem Define o caminho do arquivo de log
+set LogFile=network_log.txt
+
+rem Função para verificar a conectividade de um dispositivo
+:VerificarConectividade
+    set Dispositivo=%1
+    set Porta=%2
+    ping -n 1 %Dispositivo% > nul
+    if %errorlevel%==0 (
+        echo %date% %time% %Dispositivo% está ONLINE. >> %LogFile%
+        rem Verifica se a porta está aberta usando PowerShell
+        powershell -Command "try { (New-Object Net.Sockets.TcpClient('%Dispositivo%', %Porta%)).Close(); 'Porta %Porta% está aberta.' } catch { 'Porta %Porta% está fechada.' }" >> %LogFile%
+    ) else (
+        echo %date% %time% %Dispositivo% está OFFLINE. >> %LogFile%
+    )
+    exit /b
+
+rem Loop para verificar a conectividade dos dispositivos a cada intervalo
+:loop
+    cls
+    echo Verificando conectividade dos dispositivos...
+    echo =============================== >> %LogFile%
+    echo Verificação iniciada em %date% %time% >> %LogFile%
+    call :VerificarConectividade 192.168.1.1 80  rem Exemplo: Endereço IP do roteador e porta 80
+    call :VerificarConectividade 192.168.1.100 22 rem Exemplo: Endereço IP de um computador na rede e porta 22
+    rem Adicione mais dispositivos e portas conforme necessário
+    echo Verificação concluída em %date% %time% >> %LogFile%
+    echo =============================== >> %LogFile%
+    echo. >> %LogFile%
+
+    rem Aguarda o intervalo de tempo antes de verificar novamente
+    timeout /t %IntervaloVerificacao% /nobreak > nul
+    goto loop
